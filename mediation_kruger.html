@@ -256,7 +256,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint1')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans1')">✓ Model answer</button>
@@ -281,7 +281,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint2')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans2')">✓ Model answer</button>
@@ -306,7 +306,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint3')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans3')">✓ Model answer</button>
@@ -331,7 +331,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint4')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans4')">✓ Model answer</button>
@@ -356,7 +356,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint5')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans5')">✓ Model answer</button>
@@ -381,7 +381,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint6')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans6')">✓ Model answer</button>
@@ -406,7 +406,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint7')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans7')">✓ Model answer</button>
@@ -431,7 +431,7 @@ textarea::placeholder { color: #3a4a6a; }
       </div>
       <div class="sign-body">
         <label>Deine Erklärung auf Deutsch:</label>
-        <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
+        <textarea class="student-text" placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint8')">💡 Hint</button>
           <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans8')">✓ Model answer</button>
@@ -554,6 +554,17 @@ function revealAnswer(btn, id) {
 
 document.getElementById('codeOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
+});
+
+// ── localStorage persistence ──
+const textareas = document.querySelectorAll('textarea.student-text');
+textareas.forEach((ta, i) => {
+  const key = 'mediation_rule_' + (i + 1);
+  // Restore saved value
+  const saved = localStorage.getItem(key);
+  if (saved) ta.value = saved;
+  // Save on every input
+  ta.addEventListener('input', () => localStorage.setItem(key, ta.value));
 });
 </script>
 </body>
