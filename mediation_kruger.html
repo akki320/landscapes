@@ -165,7 +165,10 @@ textarea::placeholder { color: #3a4a6a; }
 
 <div class="top-bar">
   <h1>🌿 Mediation Task · Kruger National Park</h1>
-  <a href="exploring_the_wild.html">← Back to Exploring the Wild</a>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="unlockBadge" style="display:none;font-size:.75em;background:rgba(39,174,96,.2);color:#7dcea0;border:1px solid rgba(39,174,96,.3);padding:3px 10px;border-radius:20px;">🔓 Lehrermodus</span>
+    <a href="exploring_the_wild.html">← Back to Exploring the Wild</a>
+  </div>
 </div>
 
 <div class="main">
@@ -257,7 +260,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint1')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans1')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans1')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint1">Think about what happens if tourists walk around freely – wild animals see them as prey. Why are rest camps safer?</div>
         <div class="model-answer" id="ans1">
@@ -282,7 +285,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint2')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans2')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans2')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint2">What happens when animals eat plastic or rubbish? Think about plastic bags and bottles in nature.</div>
         <div class="model-answer" id="ans2">
@@ -307,7 +310,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint3')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans3')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans3')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint3">Animals cross the road unexpectedly. What's the difference between tar and gravel roads? Why is gravel more dangerous?</div>
         <div class="model-answer" id="ans3">
@@ -332,7 +335,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint4')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans4')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans4')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint4">What happens when animals get used to humans giving them food? Think about the long-term consequences for the animal.</div>
         <div class="model-answer" id="ans4">
@@ -357,7 +360,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint5')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans5')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans5')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint5">Why is driving at night so dangerous in a national park? What are nocturnal animals? What happens if you're late?</div>
         <div class="model-answer" id="ans5">
@@ -382,7 +385,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint6')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans6')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans6')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint6">South Africa is very dry and hot. What could happen if a small fire gets out of control? What is a "braai"?</div>
         <div class="model-answer" id="ans6">
@@ -407,7 +410,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint7')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans7')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans7')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint7">Wild animals have a very strong sense of smell. What could happen if a lion smells a dog? Think from the perspective of both the pet and the wild animal.</div>
         <div class="model-answer" id="ans7">
@@ -432,7 +435,7 @@ textarea::placeholder { color: #3a4a6a; }
         <textarea placeholder="Erkläre Lukas und Emma, was diese Regel bedeutet und warum sie so wichtig ist …"></textarea>
         <div class="sign-actions">
           <button class="btn-sm btn-hint"   onclick="toggle(this,'hint8')">💡 Hint</button>
-          <button class="btn-sm btn-answer" onclick="toggle(this,'ans8')">✓ Model answer</button>
+          <button class="btn-sm btn-answer" onclick="showAnswer(this,'ans8')">✓ Model answer</button>
         </div>
         <div class="hint-text" id="hint8">Why do animals react to noise? Think about what you want from a safari – what happens if animals hear you coming from far away?</div>
         <div class="model-answer" id="ans8">
@@ -477,16 +480,77 @@ textarea::placeholder { color: #3a4a6a; }
 
 </div>
 
+<!-- CODE MODAL -->
+<div id="codeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;">
+  <div style="background:#16213e;border:1px solid #2a4060;border-radius:18px;padding:28px 32px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.6);">
+    <div style="font-size:1.8em;margin-bottom:10px;">🔒</div>
+    <h3 style="color:var(--gold);margin-bottom:8px;font-size:1.05em;">Lehrercode erforderlich</h3>
+    <p style="color:#aaa;font-size:.85em;margin-bottom:18px;line-height:1.5;">Die Musterlösung ist nur für Lehrkräfte sichtbar. Bitte Code eingeben.</p>
+    <input id="codeInput" type="password" placeholder="Code eingeben …"
+      style="width:100%;padding:10px 14px;border-radius:8px;border:2px solid #2a4060;background:#0d1a2e;color:#eee;font-size:.95em;text-align:center;outline:none;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter') checkCode()">
+    <div id="codeError" style="color:#e74c3c;font-size:.8em;min-height:18px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="checkCode()" style="padding:9px 22px;background:var(--gold);color:#222;border:none;border-radius:20px;font-weight:bold;cursor:pointer;font-size:.9em;">Bestätigen</button>
+      <button onclick="closeModal()" style="padding:9px 22px;background:transparent;color:#888;border:2px solid #444;border-radius:20px;cursor:pointer;font-size:.9em;">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
 <script>
+const TEACHER_CODE = 'kruger25';
+let unlocked = false;
+let pendingAnswerId = null;
+let pendingBtn = null;
+
 function toggle(btn, id) {
   const el = document.getElementById(id);
   el.classList.toggle('show');
-  if (el.classList.contains('show')) {
-    btn.style.opacity = '.5';
+  btn.style.opacity = el.classList.contains('show') ? '.5' : '1';
+}
+
+function showAnswer(btn, id) {
+  if (unlocked) {
+    revealAnswer(btn, id);
+    return;
+  }
+  pendingAnswerId = id;
+  pendingBtn = btn;
+  document.getElementById('codeInput').value = '';
+  document.getElementById('codeError').textContent = '';
+  const overlay = document.getElementById('codeOverlay');
+  overlay.style.display = 'flex';
+  setTimeout(() => document.getElementById('codeInput').focus(), 50);
+}
+
+function checkCode() {
+  const val = document.getElementById('codeInput').value.trim();
+  if (val === TEACHER_CODE) {
+    unlocked = true;
+    closeModal();
+    if (pendingAnswerId) revealAnswer(pendingBtn, pendingAnswerId);
+    // Show a small unlock badge in top bar
+    const badge = document.getElementById('unlockBadge');
+    if (badge) badge.style.display = 'inline-block';
   } else {
-    btn.style.opacity = '1';
+    document.getElementById('codeError').textContent = 'Falscher Code. Bitte erneut versuchen.';
+    document.getElementById('codeInput').select();
   }
 }
+
+function closeModal() {
+  document.getElementById('codeOverlay').style.display = 'none';
+}
+
+function revealAnswer(btn, id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('show');
+  btn.style.opacity = el.classList.contains('show') ? '.5' : '1';
+}
+
+document.getElementById('codeOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
 </script>
 </body>
 </html>
