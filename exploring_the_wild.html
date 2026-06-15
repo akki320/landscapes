@@ -304,12 +304,12 @@ body {
 
   <div class="pre-quiz-card" id="pq2" style="display:none">
     <div class="pre-q-num">Question 3 of 4</div>
-    <div class="pre-q-text">The "Big Five" is a famous group of African animals. How many animals are in it?</div>
+    <div class="pre-q-text">The "Big Five" originally got its name from hunters. What made these five animals so special to hunters?</div>
     <div class="pre-opts">
-      <button class="pre-opt" onclick="preAnswer(this,2,0)">Three</button>
-      <button class="pre-opt" onclick="preAnswer(this,2,1)">Four</button>
-      <button class="pre-opt" onclick="preAnswer(this,2,2)">Five</button>
-      <button class="pre-opt" onclick="preAnswer(this,2,3)">Six</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,0)">They were the fastest animals to catch.</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,1)">They were the most dangerous and difficult animals to hunt on foot.</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,2)">They were the rarest animals in Africa.</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,3)">They were only found in one specific national park.</button>
     </div>
     <div class="pre-feedback" id="pfb2"></div>
   </div>
@@ -835,7 +835,7 @@ const preCorrect = [1, 1, 2, 0]; // correct option index for each question
 const preMsg = [
   ['Kenya is in East Africa – Kruger is in South Africa!', 'Correct! Kruger National Park is in South Africa.', 'Tanzania is in East Africa – try again.', 'Zimbabwe borders South Africa, but that\'s not it.'],
   ['Rangers don\'t fly planes.', 'Correct! Rangers protect wildlife and the natural environment.', 'That\'s not what rangers do.', 'That\'s a construction worker.'],
-  ['The Big Five has more than 3 animals!', 'There are 5, but you need one more!', 'Correct! The Big Five has exactly 5 animals.', 'There are fewer than 6.'],
+  ['Not quite – speed wasn\'t the key factor.', 'Correct! They were extremely dangerous to hunt on foot, which made them a trophy challenge.', 'Rarity wasn\'t the reason – it was the danger they posed.', 'They can be found across several African countries and parks.'],
   ['Correct! Wildlife, nature and animals are the main attractions.', 'Shopping is not why people visit national parks.', 'Parks don\'t have shops like that.', 'Football is not a reason to visit a national park.'],
 ];
 let preAnswered = [false,false,false,false];
