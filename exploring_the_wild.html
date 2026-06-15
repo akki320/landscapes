@@ -633,7 +633,7 @@ body {
 
   <div class="vocab-grid">
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🌿</div>
         <div class="vc-word">ranger</div>
@@ -648,7 +648,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🐘</div>
         <div class="vc-word">wildlife</div>
@@ -663,7 +663,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🌾</div>
         <div class="vc-word">plains</div>
@@ -678,7 +678,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🗑️</div>
         <div class="vc-word">rubbish</div>
@@ -693,7 +693,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🛡️</div>
         <div class="vc-word">protect</div>
@@ -708,7 +708,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🎯</div>
         <div class="vc-word">symbol</div>
@@ -723,7 +723,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">✈️</div>
         <div class="vc-word">tourism</div>
@@ -738,7 +738,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🏛️</div>
         <div class="vc-word">to found</div>
@@ -753,7 +753,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🧭</div>
         <div class="vc-word">guide</div>
@@ -768,7 +768,7 @@ body {
       </div>
     </div>
 
-    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+    <div class="vocab-card" onclick="flipCard(this)">
       <div class="vc-front">
         <div class="vc-icon">🦏</div>
         <div class="vc-word">the Big Five</div>
@@ -804,6 +804,11 @@ body {
 </div>
 
 <script>
+/* ── STORAGE ── */
+const STORE = 'etw_v1';
+function load() { try { return JSON.parse(localStorage.getItem(STORE)) || {}; } catch { return {}; } }
+function save(patch) { localStorage.setItem(STORE, JSON.stringify({...load(), ...patch})); }
+
 /* ── STAGE NAVIGATION ── */
 let currentStage = 0;
 const TOTAL = 5;
@@ -814,13 +819,13 @@ function goTo(n) {
   currentStage = n;
   updateNav();
   window.scrollTo({top:0, behavior:'smooth'});
+  save({stage: n});
 }
-
 function nextStage() { goTo(currentStage + 1); }
+function showCompletion() { goTo(TOTAL); }
 
 function updateNav() {
-  const pips = document.querySelectorAll('.step-pip');
-  pips.forEach((p, i) => {
+  document.querySelectorAll('.step-pip').forEach((p, i) => {
     p.classList.remove('active','done');
     if (i < currentStage) p.classList.add('done');
     if (i === currentStage) p.classList.add('active');
@@ -828,10 +833,8 @@ function updateNav() {
   document.getElementById('progressBar').style.width = (currentStage / TOTAL * 100) + '%';
 }
 
-function showCompletion() { goTo(TOTAL); }
-
 /* ── STEP 1: PRE-READING ── */
-const preCorrect = [1, 1, 2, 0]; // correct option index for each question
+const preCorrect = [1, 1, 2, 0];
 const preMsg = [
   ['Kenya is in East Africa – Kruger is in South Africa!', 'Correct! Kruger National Park is in South Africa.', 'Tanzania is in East Africa – try again.', 'Zimbabwe borders South Africa, but that\'s not it.'],
   ['Rangers don\'t fly planes.', 'Correct! Rangers protect wildlife and the natural environment.', 'That\'s not what rangers do.', 'That\'s a construction worker.'],
@@ -843,24 +846,27 @@ let preDone = 0;
 
 function preAnswer(btn, qi, chosen) {
   if (preAnswered[qi]) return;
-  preAnswered[qi] = true;
-  const opts = btn.parentElement.querySelectorAll('.pre-opt');
-  opts.forEach(b => b.disabled = true);
-  const isCorrect = chosen === preCorrect[qi];
-  btn.classList.add(isCorrect ? 'correct' : 'wrong');
-  if (!isCorrect) opts[preCorrect[qi]].classList.add('correct');
-  document.getElementById('pfb'+qi).innerHTML = (isCorrect ? '✅ ' : '❌ ') + preMsg[qi][chosen];
+  preAnswered[qi] = chosen;
+  _applyPreAnswer(qi, chosen);
   preDone++;
   if (preDone === 1) document.getElementById('pq1').style.display = 'block';
   if (preDone === 2) document.getElementById('pq2').style.display = 'block';
   if (preDone === 3) document.getElementById('pq3').style.display = 'block';
   if (preDone === 4) document.getElementById('preNextBtn').style.display = 'inline-flex';
+  save({preAnswered});
+}
+function _applyPreAnswer(qi, chosen) {
+  const opts = document.getElementById('pq'+qi).querySelectorAll('.pre-opt');
+  opts.forEach(b => b.disabled = true);
+  const isCorrect = chosen === preCorrect[qi];
+  opts[chosen].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[preCorrect[qi]].classList.add('correct');
+  document.getElementById('pfb'+qi).innerHTML = (isCorrect ? '✅ ' : '❌ ') + preMsg[qi][chosen];
 }
 
 /* ── STEP 2: READER ── */
 let readerIdx = 0;
 const bubbles = document.querySelectorAll('.bubble-wrap');
-// Hide all except first on init
 bubbles.forEach((b,i) => { if(i>0) b.classList.remove('visible'); });
 updateReaderProgress();
 
@@ -869,8 +875,8 @@ function readerNext() {
     readerIdx++;
     bubbles[readerIdx].classList.add('visible');
     updateReaderProgress();
-    const cw = document.getElementById('chatWindow');
-    cw.scrollTop = cw.scrollHeight;
+    document.getElementById('chatWindow').scrollTop = 99999;
+    save({readerIdx});
   }
 }
 function readerPrev() {
@@ -878,14 +884,15 @@ function readerPrev() {
     bubbles[readerIdx].classList.remove('visible');
     readerIdx--;
     updateReaderProgress();
+    save({readerIdx});
   }
 }
 function readerAll() {
   bubbles.forEach(b => b.classList.add('visible'));
   readerIdx = bubbles.length - 1;
   updateReaderProgress();
-  const cw = document.getElementById('chatWindow');
-  cw.scrollTop = cw.scrollHeight;
+  document.getElementById('chatWindow').scrollTop = 99999;
+  save({readerIdx});
 }
 function updateReaderProgress() {
   document.getElementById('readerProgress').textContent = `${readerIdx+1} / ${bubbles.length}`;
@@ -895,28 +902,46 @@ function updateReaderProgress() {
 let tfAnswered = {};
 let mcAnswered = {};
 let compScore  = 0;
-let compTotal  = 8; // 5 TF + 3 MC
+const compTotal = 8;
 
 function tfAnswer(btn, id, isCorrect, msg) {
   if (tfAnswered[id]) return;
-  tfAnswered[id] = true;
-  btn.parentElement.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
-  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const btns = btn.parentElement.querySelectorAll('.tf-btn');
+  const idx = Array.from(btns).indexOf(btn);
+  tfAnswered[id] = {idx, isCorrect, msg};
+  _applyTf(id, idx, isCorrect, msg);
+  if (isCorrect) { compScore++; }
+  updateCompScore();
+  save({tfAnswered, compScore});
+}
+function _applyTf(id, idx, isCorrect, msg) {
+  const btns = document.getElementById(id).querySelectorAll('.tf-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) btns.forEach(b => { if(b.getAttribute('onclick').includes(',true,')) b.classList.add('correct'); });
   const fb = document.getElementById('fb-'+id);
   fb.innerHTML = (isCorrect ? '✅ ' : '❌ ') + msg;
   fb.className = 'comp-fb ' + (isCorrect ? 'ok' : 'err');
-  if (isCorrect) { compScore++; updateCompScore(); }
 }
 
 function mcAnswer(btn, id, isCorrect, msg) {
   if (mcAnswered[id]) return;
-  mcAnswered[id] = true;
-  btn.parentElement.querySelectorAll('.mc-opt').forEach(b => b.disabled = true);
-  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const btns = btn.parentElement.querySelectorAll('.mc-opt');
+  const idx = Array.from(btns).indexOf(btn);
+  mcAnswered[id] = {idx, isCorrect, msg};
+  _applyMc(id, idx, isCorrect, msg);
+  if (isCorrect) { compScore++; }
+  updateCompScore();
+  save({mcAnswered, compScore});
+}
+function _applyMc(id, idx, isCorrect, msg) {
+  const btns = document.getElementById(id).querySelectorAll('.mc-opt');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) btns.forEach(b => { if(b.getAttribute('onclick').includes(',true,')) b.classList.add('correct'); });
   const fb = document.getElementById('fb-'+id);
   fb.innerHTML = (isCorrect ? '✅ ' : '❌ ') + msg;
   fb.className = 'comp-fb ' + (isCorrect ? 'ok' : 'err');
-  if (isCorrect) { compScore++; updateCompScore(); }
 }
 
 function updateCompScore() {
@@ -927,7 +952,7 @@ function updateCompScore() {
   }
 }
 
-/* ── STEP 4: MIND MAP ── */
+/* ── STEP 5: MIND MAP ── */
 let draggedChip = null;
 
 function mmDragStart(e) {
@@ -935,42 +960,46 @@ function mmDragStart(e) {
   e.target.classList.add('dragging');
   e.dataTransfer.setData('text/plain', e.target.dataset.word);
 }
-function mmDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
+function mmDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 function mmDragLeave(el) { el.classList.remove('drag-over'); }
 
 function mmDrop(e, branch) {
   e.preventDefault();
   branch.classList.remove('drag-over');
   if (!draggedChip) return;
-  const word   = draggedChip.dataset.word;
-  const target = draggedChip.dataset.branch;
-  const zone   = branch.dataset.branch;
-
-  // Place chip in zone
+  const word = draggedChip.dataset.word;
+  const correctBranch = draggedChip.dataset.branch;
+  _placeChip(word, correctBranch, branch.dataset.branch);
+  draggedChip.classList.add('placed');
+  draggedChip.classList.remove('dragging');
+  draggedChip = null;
+  saveMM();
+}
+function _placeChip(word, correctBranch, zoneBranch) {
+  const branch = document.querySelector(`.mm-branch[data-branch="${zoneBranch}"]`);
   const dz = branch.querySelector('.mm-drop-zone');
   const placed = document.createElement('div');
   placed.className = 'mm-placed-chip';
   placed.dataset.word = word;
-  placed.dataset.branch = target;
+  placed.dataset.branch = correctBranch;
   placed.innerHTML = word + ' <span class="remove-chip" onclick="mmRemove(this)">✕</span>';
   dz.appendChild(placed);
-
-  draggedChip.classList.add('placed');
-  draggedChip.classList.remove('dragging');
-  draggedChip = null;
+  document.querySelectorAll('.chip').forEach(c => { if(c.dataset.word === word) c.classList.add('placed'); });
 }
 
 function mmRemove(span) {
   const chip = span.parentElement;
   const word = chip.dataset.word;
   chip.remove();
-  // Re-enable source chip
-  document.querySelectorAll('.chip').forEach(c => {
-    if (c.dataset.word === word) c.classList.remove('placed');
+  document.querySelectorAll('.chip').forEach(c => { if(c.dataset.word === word) c.classList.remove('placed'); });
+  saveMM();
+}
+function saveMM() {
+  const placements = [];
+  document.querySelectorAll('.mm-placed-chip').forEach(c => {
+    placements.push({word: c.dataset.word, correctBranch: c.dataset.branch, zone: c.closest('.mm-branch').dataset.branch});
   });
+  save({mmPlacements: placements});
 }
 
 function mmCheck() {
@@ -978,32 +1007,84 @@ function mmCheck() {
   document.querySelectorAll('.mm-placed-chip').forEach(chip => {
     total++;
     const placed = chip.closest('.mm-branch').dataset.branch;
-    if (chip.dataset.branch === placed) {
-      correct++;
-      chip.style.outline = '2px solid var(--green)';
-    } else {
-      chip.style.outline = '2px solid var(--red)';
-    }
+    if (chip.dataset.branch === placed) { correct++; chip.style.outline = '2px solid var(--green)'; }
+    else chip.style.outline = '2px solid var(--red)';
   });
   const remaining = document.querySelectorAll('.chip:not(.placed)').length;
   document.getElementById('mmScore').textContent =
     `${correct} / ${total} placed correctly` +
     (remaining > 0 ? ` · ${remaining} chips not placed yet` : '') +
     (correct === 14 && total === 14 ? ' 🏆 Perfect!' : '');
-  if (correct === total && total === 14) {
-    document.getElementById('mmNextBtn').style.display = 'inline-flex';
-  }
+  if (correct === total && total === 14) document.getElementById('mmNextBtn').style.display = 'inline-flex';
 }
-
 function mmReset() {
   document.querySelectorAll('.mm-placed-chip').forEach(c => c.remove());
-  document.querySelectorAll('.chip').forEach(c => {
-    c.classList.remove('placed','dragging');
-    c.style.opacity = '';
-  });
+  document.querySelectorAll('.chip').forEach(c => { c.classList.remove('placed','dragging'); c.style.opacity = ''; });
   document.getElementById('mmScore').textContent = '';
   document.getElementById('mmNextBtn').style.display = 'none';
+  save({mmPlacements: []});
 }
+
+/* ── VOCAB CARD FLIP ── */
+function flipCard(card) {
+  card.classList.toggle('flipped');
+  const flipped = Array.from(document.querySelectorAll('.vocab-card'))
+    .map((c,i) => c.classList.contains('flipped') ? i : -1).filter(i => i >= 0);
+  save({vocabFlipped: flipped});
+}
+
+/* ── RESTORE ON LOAD ── */
+(function restore() {
+  const s = load();
+
+  // Pre-quiz
+  if (s.preAnswered) {
+    s.preAnswered.forEach((chosen, qi) => {
+      if (chosen === false || chosen === undefined || chosen === null) return;
+      preAnswered[qi] = chosen;
+      if (qi > 0) document.getElementById('pq'+qi).style.display = 'block';
+      _applyPreAnswer(qi, chosen);
+      preDone++;
+    });
+    if (preDone >= 1) document.getElementById('pq1').style.display = 'block';
+    if (preDone >= 2) document.getElementById('pq2').style.display = 'block';
+    if (preDone >= 3) document.getElementById('pq3').style.display = 'block';
+    if (preDone >= 4) document.getElementById('preNextBtn').style.display = 'inline-flex';
+  }
+
+  // Reader
+  if (s.readerIdx) {
+    for (let i = 1; i <= s.readerIdx; i++) bubbles[i]?.classList.add('visible');
+    readerIdx = s.readerIdx;
+    updateReaderProgress();
+  }
+
+  // Comprehension
+  if (s.tfAnswered) {
+    tfAnswered = s.tfAnswered;
+    compScore = s.compScore || 0;
+    Object.entries(tfAnswered).forEach(([id, {idx, isCorrect, msg}]) => _applyTf(id, idx, isCorrect, msg));
+  }
+  if (s.mcAnswered) {
+    mcAnswered = s.mcAnswered;
+    Object.entries(mcAnswered).forEach(([id, {idx, isCorrect, msg}]) => _applyMc(id, idx, isCorrect, msg));
+    updateCompScore();
+  }
+
+  // Mind map
+  if (s.mmPlacements?.length) {
+    s.mmPlacements.forEach(({word, correctBranch, zone}) => _placeChip(word, correctBranch, zone));
+  }
+
+  // Vocab flips – now use flipCard handler via classList directly
+  if (s.vocabFlipped) {
+    const cards = document.querySelectorAll('.vocab-card');
+    s.vocabFlipped.forEach(i => cards[i]?.classList.add('flipped'));
+  }
+
+  // Stage (last, so UI is ready)
+  if (s.stage) goTo(s.stage);
+})();
 </script>
 </body>
 </html>
