@@ -166,7 +166,6 @@ textarea::placeholder { color: #3a4a6a; }
 <div class="top-bar">
   <h1>🌿 Mediation Task · Kruger National Park</h1>
   <div style="display:flex;align-items:center;gap:12px;">
-    <span id="unlockBadge" style="display:none;font-size:.75em;background:rgba(39,174,96,.2);color:#7dcea0;border:1px solid rgba(39,174,96,.3);padding:3px 10px;border-radius:20px;">🔓 Lehrermodus</span>
     <a href="exploring_the_wild.html">← Back to Exploring the Wild</a>
   </div>
 </div>
@@ -484,8 +483,8 @@ textarea::placeholder { color: #3a4a6a; }
 <div id="codeOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;">
   <div style="background:#16213e;border:1px solid #2a4060;border-radius:18px;padding:28px 32px;max-width:340px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.6);">
     <div style="font-size:1.8em;margin-bottom:10px;">🔒</div>
-    <h3 style="color:var(--gold);margin-bottom:8px;font-size:1.05em;">Lehrercode erforderlich</h3>
-    <p style="color:#aaa;font-size:.85em;margin-bottom:18px;line-height:1.5;">Die Musterlösung ist nur für Lehrkräfte sichtbar. Bitte Code eingeben.</p>
+    <h3 id="modalLabel" style="color:var(--gold);margin-bottom:8px;font-size:1.05em;">Musterlösung</h3>
+    <p style="color:#aaa;font-size:.85em;margin-bottom:18px;line-height:1.5;">Nur für Lehrkräfte. Bitte den Code für diese Aufgabe eingeben.</p>
     <input id="codeInput" type="password" placeholder="Code eingeben …"
       style="width:100%;padding:10px 14px;border-radius:8px;border:2px solid #2a4060;background:#0d1a2e;color:#eee;font-size:.95em;text-align:center;outline:none;margin-bottom:12px;"
       onkeydown="if(event.key==='Enter') checkCode()">
@@ -498,8 +497,17 @@ textarea::placeholder { color: #3a4a6a; }
 </div>
 
 <script>
-const TEACHER_CODE = 'kruger25';
-let unlocked = false;
+const CODES = {
+  ans1: 'KR-A01',
+  ans2: 'KR-A02',
+  ans3: 'KR-A03',
+  ans4: 'KR-A04',
+  ans5: 'KR-A05',
+  ans6: 'KR-A06',
+  ans7: 'KR-A07',
+  ans8: 'KR-A08',
+};
+const unlocked = {};
 let pendingAnswerId = null;
 let pendingBtn = null;
 
@@ -510,12 +518,11 @@ function toggle(btn, id) {
 }
 
 function showAnswer(btn, id) {
-  if (unlocked) {
-    revealAnswer(btn, id);
-    return;
-  }
+  if (unlocked[id]) { revealAnswer(btn, id); return; }
   pendingAnswerId = id;
   pendingBtn = btn;
+  const num = id.replace('ans','');
+  document.getElementById('modalLabel').textContent = `Musterlösung – Rule ${num}`;
   document.getElementById('codeInput').value = '';
   document.getElementById('codeError').textContent = '';
   const overlay = document.getElementById('codeOverlay');
@@ -525,13 +532,10 @@ function showAnswer(btn, id) {
 
 function checkCode() {
   const val = document.getElementById('codeInput').value.trim();
-  if (val === TEACHER_CODE) {
-    unlocked = true;
+  if (val === CODES[pendingAnswerId]) {
+    unlocked[pendingAnswerId] = true;
     closeModal();
-    if (pendingAnswerId) revealAnswer(pendingBtn, pendingAnswerId);
-    // Show a small unlock badge in top bar
-    const badge = document.getElementById('unlockBadge');
-    if (badge) badge.style.display = 'inline-block';
+    revealAnswer(pendingBtn, pendingAnswerId);
   } else {
     document.getElementById('codeError').textContent = 'Falscher Code. Bitte erneut versuchen.';
     document.getElementById('codeInput').select();
