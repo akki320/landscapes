@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exploring the Wild – Kruger National Park</title>
+<style>
+:root {
+  --green: #27ae60; --dkgreen: #1e8449;
+  --red: #e74c3c; --blue: #2980b9; --dkblue: #1a5276;
+  --gold: #f0c040; --orange: #e67e22;
+  --dark: #1a1a2e; --card: #16213e; --accent: #0f3460;
+  --text: #eee; --muted: #888;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--dark); color: var(--text);
+  min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+  padding: 0 0 60px;
+}
+
+/* ── PROGRESS BAR ── */
+.top-bar {
+  width: 100%; background: var(--card); padding: 14px 20px;
+  display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+.top-bar h1 { font-size: 1em; color: var(--gold); white-space: nowrap; }
+.steps-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.step-pip {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid #333; background: #222;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75em; font-weight: bold; color: #555; cursor: pointer;
+  transition: all .25s;
+}
+.step-pip.done   { background: var(--green); border-color: var(--green); color: #fff; }
+.step-pip.active { background: var(--gold);  border-color: var(--gold);  color: #222; }
+.step-pip:hover  { border-color: var(--gold); }
+.progress-bar-wrap { flex: 1; height: 6px; background: #333; border-radius: 3px; }
+.progress-bar { height: 100%; background: var(--green); border-radius: 3px; transition: width .4s; }
+
+/* ── STAGE WRAPPER ── */
+.stage { display: none; width: 100%; max-width: 860px; padding: 28px 16px; flex-direction: column; gap: 20px; }
+.stage.active { display: flex; }
+.stage-header { text-align: center; }
+.stage-badge {
+  display: inline-block; background: var(--accent); color: var(--gold);
+  font-size: .75em; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 8px;
+}
+.stage-header h2 { font-size: 1.6em; color: var(--gold); margin-bottom: 6px; }
+.stage-header p  { color: var(--muted); font-size: .9em; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 11px 26px; border: none; border-radius: 30px; cursor: pointer;
+  font-size: .95em; font-weight: bold; transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-gold  { background: var(--gold); color: #222; }
+.btn-gold:hover  { background: #e0b030; transform: scale(1.03); }
+.btn-blue  { background: var(--blue); color: #fff; }
+.btn-blue:hover  { opacity: .85; transform: scale(1.03); }
+.btn-ghost { background: transparent; border: 2px solid #444; color: #aaa; }
+.btn-ghost:hover { border-color: #aaa; color: #fff; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: var(--dkgreen); transform: scale(1.03); }
+.btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+
+/* ══════════════════════════════════
+   STEP 1 – PRE-READING QUIZ
+══════════════════════════════════ */
+.pre-quiz-card {
+  background: var(--card); border-radius: 16px; padding: 22px 24px;
+  border: 1px solid #1e2d4a;
+}
+.pre-q-num  { font-size: .75em; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.pre-q-text { font-size: 1.05em; margin-bottom: 16px; line-height: 1.5; }
+.pre-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pre-opt {
+  padding: 11px 14px; border: 2px solid #2a3a5a; border-radius: 10px;
+  cursor: pointer; background: var(--accent); color: var(--text);
+  font-size: .9em; transition: all .18s; text-align: left;
+}
+.pre-opt:hover:not(:disabled) { border-color: var(--gold); background: #1a4080; }
+.pre-opt.correct { border-color: var(--green); background: rgba(39,174,96,.2); font-weight: bold; }
+.pre-opt.wrong   { border-color: var(--red);   background: rgba(231,76,60,.15); }
+.pre-feedback { margin-top: 12px; font-size: .9em; min-height: 22px; color: #aaa; }
+
+/* ══════════════════════════════════
+   STEP 2 – INTERACTIVE READER
+══════════════════════════════════ */
+.reader-controls {
+  display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap;
+}
+.chat-window {
+  background: var(--card); border-radius: 16px; padding: 20px;
+  border: 1px solid #1e2d4a; display: flex; flex-direction: column; gap: 14px;
+  max-height: 460px; overflow-y: auto; scroll-behavior: smooth;
+}
+.bubble-wrap { display: none; gap: 10px; align-items: flex-end; }
+.bubble-wrap.visible { display: flex; animation: bubbleFadeIn .35s ease forwards; }
+@keyframes bubbleFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.bubble-wrap.cathy { flex-direction: row; }
+.bubble-wrap.tony  { flex-direction: row-reverse; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1em; font-weight: bold; flex-shrink: 0;
+}
+.avatar.c { background: #2471a3; color: #fff; }
+.avatar.t { background: #1e8449; color: #fff; }
+.bubble {
+  max-width: 75%; padding: 12px 16px; border-radius: 16px; font-size: .9em; line-height: 1.55;
+}
+.bubble.c { background: #1a3a5a; border-bottom-left-radius: 4px; }
+.bubble.t { background: #1a3d2a; border-bottom-right-radius: 4px; text-align: right; }
+.speaker { font-size: .7em; font-weight: bold; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+.bubble.c .speaker { color: #5dade2; }
+.bubble.t .speaker { color: #58d68d; }
+
+/* vocab tooltip */
+.vword {
+  border-bottom: 2px dotted var(--gold); cursor: help; position: relative;
+  color: #f9e4a0;
+}
+.vword .vtooltip {
+  display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+  background: #0d1b2a; color: var(--text); font-size: .82em; padding: 7px 12px;
+  border-radius: 8px; white-space: nowrap; z-index: 200; border: 1px solid #2a4060;
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+.vword .vtooltip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #0d1b2a;
+}
+.vword:hover .vtooltip { display: block; }
+
+.reader-progress { text-align: center; color: var(--muted); font-size: .85em; }
+
+/* ══════════════════════════════════
+   STEP 3 – COMPREHENSION QUIZ
+══════════════════════════════════ */
+.comp-section { background: var(--card); border-radius: 16px; padding: 22px 24px; border: 1px solid #1e2d4a; }
+.comp-section h3 { font-size: .85em; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 16px; }
+.comp-q { margin-bottom: 20px; }
+.comp-q-text { font-size: .97em; margin-bottom: 10px; line-height: 1.5; }
+.tf-opts { display: flex; gap: 10px; }
+.tf-btn {
+  padding: 9px 22px; border: 2px solid #2a3a5a; border-radius: 8px;
+  cursor: pointer; background: var(--accent); color: var(--text); font-size: .9em; font-weight: bold;
+  transition: all .18s;
+}
+.tf-btn:hover:not(:disabled) { border-color: var(--gold); }
+.tf-btn.correct { border-color: var(--green); background: rgba(39,174,96,.2); }
+.tf-btn.wrong   { border-color: var(--red);   background: rgba(231,76,60,.15); }
+.mc-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mc-opt {
+  padding: 9px 12px; border: 2px solid #2a3a5a; border-radius: 8px;
+  cursor: pointer; background: var(--accent); color: var(--text); font-size: .88em;
+  transition: all .18s; text-align: left;
+}
+.mc-opt:hover:not(:disabled) { border-color: var(--gold); background: #1a4080; }
+.mc-opt.correct { border-color: var(--green); background: rgba(39,174,96,.2); font-weight: bold; }
+.mc-opt.wrong   { border-color: var(--red);   background: rgba(231,76,60,.15); }
+.comp-fb { font-size: .82em; margin-top: 7px; min-height: 18px; }
+.comp-fb.ok  { color: var(--green); }
+.comp-fb.err { color: var(--red); }
+.comp-score { text-align: center; font-size: 1.1em; color: var(--gold); font-weight: bold; margin-top: 10px; }
+
+/* ══════════════════════════════════
+   STEP 4 – MIND MAP
+══════════════════════════════════ */
+.mindmap-wrap { display: flex; flex-direction: column; gap: 16px; }
+.mindmap-chips {
+  background: var(--card); border-radius: 14px; padding: 16px;
+  border: 1px solid #1e2d4a; display: flex; flex-wrap: wrap; gap: 8px; min-height: 56px;
+}
+.chip {
+  padding: 7px 14px; background: var(--accent); border: 2px solid #2a4060;
+  border-radius: 20px; font-size: .85em; cursor: grab; user-select: none;
+  transition: all .18s; white-space: nowrap;
+}
+.chip:hover  { border-color: var(--gold); background: #1a4080; }
+.chip.placed { opacity: .35; cursor: default; pointer-events: none; }
+.chip.dragging { opacity: .5; }
+
+.mm-branches { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.mm-branch {
+  background: var(--card); border-radius: 14px; padding: 16px;
+  border: 2px solid #1e2d4a; transition: border-color .2s;
+}
+.mm-branch.drag-over { border-color: var(--gold); background: #1a2a4a; }
+.mm-branch.correct   { border-color: var(--green); }
+.mm-branch.wrong-drop { border-color: var(--red); animation: shake .3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+.mm-branch-title { font-size: .8em; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; margin-bottom: 10px; }
+.mm-branch[data-branch="animals"] .mm-branch-title { color: #e67e22; }
+.mm-branch[data-branch="location"] .mm-branch-title { color: #5dade2; }
+.mm-branch[data-branch="history"] .mm-branch-title { color: #a569bd; }
+.mm-branch[data-branch="rules"] .mm-branch-title { color: #58d68d; }
+.mm-drop-zone { min-height: 44px; display: flex; flex-wrap: wrap; gap: 6px; }
+.mm-placed-chip {
+  padding: 6px 12px; border-radius: 16px; font-size: .82em;
+  border: 2px solid; display: flex; align-items: center; gap: 6px;
+}
+.mm-placed-chip .remove-chip { cursor: pointer; font-size: .8em; opacity: .6; }
+.mm-placed-chip .remove-chip:hover { opacity: 1; }
+.mm-branch[data-branch="animals"]  .mm-placed-chip { border-color: #e67e22; background: rgba(230,126,34,.12); }
+.mm-branch[data-branch="location"] .mm-placed-chip { border-color: #5dade2; background: rgba(93,173,226,.12); }
+.mm-branch[data-branch="history"]  .mm-placed-chip { border-color: #a569bd; background: rgba(165,105,189,.12); }
+.mm-branch[data-branch="rules"]    .mm-placed-chip { border-color: #58d68d; background: rgba(88,214,141,.12); }
+
+.mm-center {
+  text-align: center; background: var(--gold); color: #222;
+  border-radius: 40px; padding: 12px 28px; font-weight: bold; font-size: 1em;
+  width: fit-content; margin: 0 auto;
+}
+
+/* ══════════════════════════════════
+   STEP 5 – VOCABULARY SPOTLIGHT
+══════════════════════════════════ */
+.vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.vocab-card {
+  background: var(--card); border-radius: 14px; padding: 18px;
+  border: 1px solid #1e2d4a; cursor: pointer; transition: all .25s;
+  perspective: 600px;
+}
+.vocab-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+.vocab-card.flipped .vc-front { display: none; }
+.vocab-card.flipped .vc-back  { display: block; }
+.vc-front, .vc-back { }
+.vc-back { display: none; }
+.vc-icon { font-size: 2em; margin-bottom: 8px; }
+.vc-word { font-size: 1.15em; font-weight: bold; color: var(--gold); margin-bottom: 4px; }
+.vc-pos  { font-size: .75em; color: var(--muted); margin-bottom: 8px; font-style: italic; }
+.vc-hint { font-size: .82em; color: #aaa; }
+.vc-def  { font-size: .88em; line-height: 1.5; color: #ddd; margin-bottom: 8px; }
+.vc-example { font-size: .82em; color: #aaa; font-style: italic; border-left: 3px solid var(--gold); padding-left: 8px; }
+.vc-flip-hint { font-size: .72em; color: #555; text-align: right; margin-top: 10px; }
+
+/* ── COMPLETION BANNER ── */
+.completion-banner {
+  background: linear-gradient(135deg, #1e3a1e, #0f3460);
+  border: 2px solid var(--gold); border-radius: 20px; padding: 30px;
+  text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.completion-banner .trophy { font-size: 3.5em; }
+.completion-banner h2 { font-size: 1.8em; color: var(--gold); }
+.completion-banner p  { color: #bbb; max-width: 420px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="top-bar">
+  <h1>🌿 Exploring the Wild</h1>
+  <div class="steps-row" id="stepsRow">
+    <div class="step-pip active" onclick="goTo(0)" title="Pre-Reading Quiz">1</div>
+    <div class="step-pip"        onclick="goTo(1)" title="Interactive Reader">2</div>
+    <div class="step-pip"        onclick="goTo(2)" title="Comprehension Quiz">3</div>
+    <div class="step-pip"        onclick="goTo(3)" title="Mind Map">4</div>
+    <div class="step-pip"        onclick="goTo(4)" title="Vocabulary">5</div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+</div>
+
+<!-- ══ STAGE 1: PRE-READING ══ -->
+<div class="stage active" id="stage0">
+  <div class="stage-header">
+    <div class="stage-badge">Step 1 of 5 · Pre-Reading</div>
+    <h2>What do you already know?</h2>
+    <p>Answer 4 quick questions before you read the interview.</p>
+  </div>
+
+  <div class="pre-quiz-card" id="pq0">
+    <div class="pre-q-num">Question 1 of 4</div>
+    <div class="pre-q-text">In which country is the Kruger National Park?</div>
+    <div class="pre-opts">
+      <button class="pre-opt" onclick="preAnswer(this,0,0)">Kenya</button>
+      <button class="pre-opt" onclick="preAnswer(this,0,1)">South Africa</button>
+      <button class="pre-opt" onclick="preAnswer(this,0,2)">Tanzania</button>
+      <button class="pre-opt" onclick="preAnswer(this,0,3)">Zimbabwe</button>
+    </div>
+    <div class="pre-feedback" id="pfb0"></div>
+  </div>
+
+  <div class="pre-quiz-card" id="pq1" style="display:none">
+    <div class="pre-q-num">Question 2 of 4</div>
+    <div class="pre-q-text">What does a <strong>ranger</strong> do in a national park?</div>
+    <div class="pre-opts">
+      <button class="pre-opt" onclick="preAnswer(this,1,0)">Flies tourists by plane</button>
+      <button class="pre-opt" onclick="preAnswer(this,1,1)">Protects wildlife &amp; nature</button>
+      <button class="pre-opt" onclick="preAnswer(this,1,2)">Runs a restaurant</button>
+      <button class="pre-opt" onclick="preAnswer(this,1,3)">Builds roads</button>
+    </div>
+    <div class="pre-feedback" id="pfb1"></div>
+  </div>
+
+  <div class="pre-quiz-card" id="pq2" style="display:none">
+    <div class="pre-q-num">Question 3 of 4</div>
+    <div class="pre-q-text">The "Big Five" is a famous group of African animals. How many animals are in it?</div>
+    <div class="pre-opts">
+      <button class="pre-opt" onclick="preAnswer(this,2,0)">Three</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,1)">Four</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,2)">Five</button>
+      <button class="pre-opt" onclick="preAnswer(this,2,3)">Six</button>
+    </div>
+    <div class="pre-feedback" id="pfb2"></div>
+  </div>
+
+  <div class="pre-quiz-card" id="pq3" style="display:none">
+    <div class="pre-q-num">Question 4 of 4</div>
+    <div class="pre-q-text">Why do people visit national parks?</div>
+    <div class="pre-opts">
+      <button class="pre-opt" onclick="preAnswer(this,3,0)">To see wild animals in nature</button>
+      <button class="pre-opt" onclick="preAnswer(this,3,1)">To buy local food</button>
+      <button class="pre-opt" onclick="preAnswer(this,3,2)">To go shopping</button>
+      <button class="pre-opt" onclick="preAnswer(this,3,3)">To watch football</button>
+    </div>
+    <div class="pre-feedback" id="pfb3"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="nextStage()" id="preNextBtn" style="display:none">
+      Start Reading →
+    </button>
+  </div>
+</div>
+
+<!-- ══ STAGE 2: READER ══ -->
+<div class="stage" id="stage1">
+  <div class="stage-header">
+    <div class="stage-badge">Step 2 of 5 · Read &amp; Listen</div>
+    <h2>Exploring the Wild</h2>
+    <p>Read the radio interview. Click on <span style="color:var(--gold);border-bottom:2px dotted var(--gold)">highlighted words</span> for definitions.</p>
+  </div>
+
+  <div class="reader-controls">
+    <button class="btn btn-blue" onclick="readerPrev()">← Prev</button>
+    <span class="reader-progress" id="readerProgress">1 / 12</span>
+    <button class="btn btn-blue" onclick="readerNext()">Next →</button>
+    <button class="btn btn-ghost" onclick="readerAll()">Show All</button>
+  </div>
+
+  <div class="chat-window" id="chatWindow">
+
+    <div class="bubble-wrap cathy visible">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy – Radio Cape Gold FM</div>
+        This is Radio Cape Gold FM. It's four o'clock and you're listening to <em>Exploring the wild</em>, with me, Cathy Kotze. I'm here today with Tony Okumor, a <span class="vword">ranger<span class="vtooltip">ranger (n.) – a person who looks after a national park or forest and the animals living there</span></span> at Kruger National Park. Welcome, Tony!
+      </div>
+    </div>
+
+    <div class="bubble-wrap tony">
+      <div class="avatar t">T</div>
+      <div class="bubble t">
+        <div class="speaker">Tony – Ranger, Kruger NP</div>
+        Thanks for having me.
+      </div>
+    </div>
+
+    <div class="bubble-wrap cathy">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy</div>
+        We are very interested to hear about your work. What do you like about it?
+      </div>
+    </div>
+
+    <div class="bubble-wrap tony">
+      <div class="avatar t">T</div>
+      <div class="bubble t">
+        <div class="speaker">Tony</div>
+        I'm a ranger in one of the most amazing parks in the world. It's fantastic. I've always been interested in our <span class="vword">wildlife<span class="vtooltip">wildlife (n.) – wild animals and plants living in their natural environment</span></span> and wanted to teach people how to <span class="vword">protect<span class="vtooltip">protect (v.) – to keep something or someone safe from harm or damage</span></span> it.
+      </div>
+    </div>
+
+    <div class="bubble-wrap cathy">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy</div>
+        Tony, what's special about the park?
+      </div>
+    </div>
+
+    <div class="bubble-wrap tony">
+      <div class="avatar t">T</div>
+      <div class="bubble t">
+        <div class="speaker">Tony</div>
+        There are <span class="vword">plains<span class="vtooltip">plains (n. pl.) – large, flat areas of land with very few trees</span></span> and the land is quite flat, with only a few hills. The park is South Africa's oldest and largest national park. It was <span class="vword">founded<span class="vtooltip">founded (v.) – officially started or established for the first time</span></span> and named after President Paul Kruger in 1926. Its goal is to protect the wildlife in South Africa.
+      </div>
+    </div>
+
+    <div class="bubble-wrap cathy">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy</div>
+        When did <span class="vword">tourism<span class="vtooltip">tourism (n.) – the business of providing services for people who travel for pleasure</span></span> in the park start?
+      </div>
+    </div>
+
+    <div class="bubble-wrap tony">
+      <div class="avatar t">T</div>
+      <div class="bubble t">
+        <div class="speaker">Tony</div>
+        The park was opened to tourism in 1927. Roads, visitor centres and <span class="vword">fences<span class="vtooltip">fence (n.) – a barrier made of wood or wire used to mark a boundary or keep animals in</span></span> were built and <span class="vword">guides<span class="vtooltip">guide (n.) – a person who shows tourists around and explains things</span></span> were trained.
+      </div>
+    </div>
+
+    <div class="bubble-wrap cathy">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy</div>
+        What happened to the animals before the park was founded?
+      </div>
+    </div>
+
+    <div class="bubble-wrap tony">
+      <div class="avatar t">T</div>
+      <div class="bubble t">
+        <div class="speaker">Tony</div>
+        Many animals were killed by hunters, for example. Even today there are lots of problems. But there are many rules now. Visitors have to stay in their cars for their own safety. We are also trying to reduce how much <span class="vword">rubbish<span class="vtooltip">rubbish (n.) – waste material, things that are thrown away; also called "trash" or "garbage"</span></span> is in the park.
+      </div>
+    </div>
+
+    <div class="bubble-wrap cathy">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy</div>
+        Most people come to see the 'Big Five': the elephant, the lion, the leopard, the rhino and the buffalo. Where does the name 'Big Five' come from?
+      </div>
+    </div>
+
+    <div class="bubble-wrap tony">
+      <div class="avatar t">T</div>
+      <div class="bubble t">
+        <div class="speaker">Tony</div>
+        The name was first introduced by hunters – it was very difficult to hunt these large animals. But today we use it as a <span class="vword">symbol<span class="vtooltip">symbol (n.) – something that represents or stands for something else, e.g. a dove is a symbol of peace</span></span> for these amazing animals. That's why we treat them with great care and do everything we can to protect them.
+      </div>
+    </div>
+
+    <div class="bubble-wrap cathy">
+      <div class="avatar c">C</div>
+      <div class="bubble c">
+        <div class="speaker">Cathy</div>
+        Thanks a lot, Tony. You can chat online with Tony too, if you want to know more. Next in the news with Jules.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-gold" onclick="nextStage()">I've read it → Start Quiz</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 3: COMPREHENSION ══ -->
+<div class="stage" id="stage2">
+  <div class="stage-header">
+    <div class="stage-badge">Step 3 of 5 · Comprehension</div>
+    <h2>Did you understand?</h2>
+    <p>True or False – then choose the right answer.</p>
+  </div>
+
+  <!-- TRUE / FALSE -->
+  <div class="comp-section">
+    <h3>True or False?</h3>
+
+    <div class="comp-q" id="tf0">
+      <div class="comp-q-text">1. The Kruger National Park is South Africa's <em>newest</em> national park.</div>
+      <div class="tf-opts">
+        <button class="tf-btn" onclick="tfAnswer(this,'tf0',false,'It is South Africa\'s <strong>oldest</strong> and largest national park.')">True</button>
+        <button class="tf-btn" onclick="tfAnswer(this,'tf0',true,'Correct! It is the oldest and largest national park in South Africa.')">False</button>
+      </div>
+      <div class="comp-fb" id="fb-tf0"></div>
+    </div>
+
+    <div class="comp-q" id="tf1">
+      <div class="comp-q-text">2. The park was opened to tourism in 1927.</div>
+      <div class="tf-opts">
+        <button class="tf-btn" onclick="tfAnswer(this,'tf1',true,'Correct! Tourism started in 1927.')">True</button>
+        <button class="tf-btn" onclick="tfAnswer(this,'tf1',false,'Actually, tourism <strong>did</strong> start in 1927.')">False</button>
+      </div>
+      <div class="comp-fb" id="fb-tf1"></div>
+    </div>
+
+    <div class="comp-q" id="tf2">
+      <div class="comp-q-text">3. Visitors must stay in their cars for their own safety.</div>
+      <div class="tf-opts">
+        <button class="tf-btn" onclick="tfAnswer(this,'tf2',true,'Correct! It\'s one of the important park rules.')">True</button>
+        <button class="tf-btn" onclick="tfAnswer(this,'tf2',false,'Tony clearly says: visitors have to stay in their cars for safety.')">False</button>
+      </div>
+      <div class="comp-fb" id="fb-tf2"></div>
+    </div>
+
+    <div class="comp-q" id="tf3">
+      <div class="comp-q-text">4. The name "Big Five" was introduced by <em>tourists</em>.</div>
+      <div class="tf-opts">
+        <button class="tf-btn" onclick="tfAnswer(this,'tf3',false,'The name was introduced by <strong>hunters</strong>, not tourists.')">True</button>
+        <button class="tf-btn" onclick="tfAnswer(this,'tf3',true,'Correct! Hunters first used the name "Big Five".')">False</button>
+      </div>
+      <div class="comp-fb" id="fb-tf3"></div>
+    </div>
+
+    <div class="comp-q" id="tf4">
+      <div class="comp-q-text">5. The park was named after President Paul Kruger in 1926.</div>
+      <div class="tf-opts">
+        <button class="tf-btn" onclick="tfAnswer(this,'tf4',true,'Correct! It was founded and named after President Paul Kruger in 1926.')">True</button>
+        <button class="tf-btn" onclick="tfAnswer(this,'tf4',false,'Tony says the park was named after President Paul Kruger in 1926.')">False</button>
+      </div>
+      <div class="comp-fb" id="fb-tf4"></div>
+    </div>
+  </div>
+
+  <!-- MULTIPLE CHOICE -->
+  <div class="comp-section">
+    <h3>Choose the right answer</h3>
+
+    <div class="comp-q" id="mc0">
+      <div class="comp-q-text">6. Which animals are part of the "Big Five"?</div>
+      <div class="mc-opts">
+        <button class="mc-opt" onclick="mcAnswer(this,'mc0',false,'Close, but crocodile and zebra are not part of the Big Five.')">Lion, elephant, crocodile, zebra, buffalo</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc0',true,'Correct! Elephant, lion, leopard, rhino and buffalo.')">Elephant, lion, leopard, rhino, buffalo</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc0',false,'Giraffe and cheetah are not in the Big Five.')">Lion, giraffe, cheetah, rhino, buffalo</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc0',false,'Hippo and zebra are not in the Big Five.')">Elephant, hippo, leopard, zebra, buffalo</button>
+      </div>
+      <div class="comp-fb" id="fb-mc0"></div>
+    </div>
+
+    <div class="comp-q" id="mc1">
+      <div class="comp-q-text">7. What is the main goal of Kruger National Park?</div>
+      <div class="mc-opts">
+        <button class="mc-opt" onclick="mcAnswer(this,'mc1',false,'That\'s not the main goal mentioned by Tony.')">To earn money from tourism</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc1',false,'The park does train guides, but that\'s not the main goal.')">To train safari guides</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc1',true,'Correct! Tony says the goal is to protect the wildlife in South Africa.')">To protect wildlife in South Africa</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc1',false,'Building roads was done to enable tourism, not the main goal.')">To build roads and fences</button>
+      </div>
+      <div class="comp-fb" id="fb-mc1"></div>
+    </div>
+
+    <div class="comp-q" id="mc2">
+      <div class="comp-q-text">8. Why do visitors have to stay in their cars?</div>
+      <div class="mc-opts">
+        <button class="mc-opt" onclick="mcAnswer(this,'mc2',false,'It\'s not about comfort – it\'s about safety.')">Because it is more comfortable</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc2',true,'Correct! Tony says it\'s for their own safety.')">For their own safety</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc2',false,'That\'s not the reason given in the text.')">Because the roads are too narrow</button>
+        <button class="mc-opt" onclick="mcAnswer(this,'mc2',false,'Tony doesn\'t mention that as the reason.')">To reduce rubbish in the park</button>
+      </div>
+      <div class="comp-fb" id="fb-mc2"></div>
+    </div>
+  </div>
+
+  <div class="comp-score" id="compScore"></div>
+  <div class="btn-row">
+    <button class="btn btn-gold" onclick="nextStage()">Next: Mind Map →</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 4: MIND MAP ══ -->
+<div class="stage" id="stage3">
+  <div class="stage-header">
+    <div class="stage-badge">Step 4 of 5 · Mind Map</div>
+    <h2>Complete the Mind Map</h2>
+    <p>Drag each label into the correct category.</p>
+  </div>
+
+  <div class="mindmap-wrap">
+    <div class="mm-center">🏞️ Kruger National Park</div>
+
+    <div class="mm-branches">
+      <div class="mm-branch" data-branch="animals"
+           ondragover="mmDragOver(event)" ondrop="mmDrop(event,this)" ondragleave="mmDragLeave(this)">
+        <div class="mm-branch-title">🦁 Animals</div>
+        <div class="mm-drop-zone" id="dz-animals"></div>
+      </div>
+      <div class="mm-branch" data-branch="location"
+           ondragover="mmDragOver(event)" ondrop="mmDrop(event,this)" ondragleave="mmDragLeave(this)">
+        <div class="mm-branch-title">📍 Location</div>
+        <div class="mm-drop-zone" id="dz-location"></div>
+      </div>
+      <div class="mm-branch" data-branch="history"
+           ondragover="mmDragOver(event)" ondrop="mmDrop(event,this)" ondragleave="mmDragLeave(this)">
+        <div class="mm-branch-title">📅 History</div>
+        <div class="mm-drop-zone" id="dz-history"></div>
+      </div>
+      <div class="mm-branch" data-branch="rules"
+           ondragover="mmDragOver(event)" ondrop="mmDrop(event,this)" ondragleave="mmDragLeave(this)">
+        <div class="mm-branch-title">📋 Rules &amp; Goals</div>
+        <div class="mm-drop-zone" id="dz-rules"></div>
+      </div>
+    </div>
+
+    <div class="mindmap-chips" id="mmChips">
+      <div class="chip" draggable="true" data-word="elephant"        data-branch="animals"  ondragstart="mmDragStart(event)">elephant</div>
+      <div class="chip" draggable="true" data-word="lion"            data-branch="animals"  ondragstart="mmDragStart(event)">lion</div>
+      <div class="chip" draggable="true" data-word="leopard"         data-branch="animals"  ondragstart="mmDragStart(event)">leopard</div>
+      <div class="chip" draggable="true" data-word="rhino"           data-branch="animals"  ondragstart="mmDragStart(event)">rhino</div>
+      <div class="chip" draggable="true" data-word="buffalo"         data-branch="animals"  ondragstart="mmDragStart(event)">buffalo</div>
+      <div class="chip" draggable="true" data-word="South Africa"    data-branch="location" ondragstart="mmDragStart(event)">South Africa</div>
+      <div class="chip" draggable="true" data-word="flat plains"     data-branch="location" ondragstart="mmDragStart(event)">flat plains</div>
+      <div class="chip" draggable="true" data-word="few hills"       data-branch="location" ondragstart="mmDragStart(event)">few hills</div>
+      <div class="chip" draggable="true" data-word="founded in 1926" data-branch="history"  ondragstart="mmDragStart(event)">founded in 1926</div>
+      <div class="chip" draggable="true" data-word="named after President Paul Kruger" data-branch="history" ondragstart="mmDragStart(event)">named after Paul Kruger</div>
+      <div class="chip" draggable="true" data-word="tourism from 1927" data-branch="history" ondragstart="mmDragStart(event)">tourism from 1927</div>
+      <div class="chip" draggable="true" data-word="stay in cars"    data-branch="rules"    ondragstart="mmDragStart(event)">stay in cars</div>
+      <div class="chip" draggable="true" data-word="reduce rubbish"  data-branch="rules"    ondragstart="mmDragStart(event)">reduce rubbish</div>
+      <div class="chip" draggable="true" data-word="protect wildlife" data-branch="rules"   ondragstart="mmDragStart(event)">protect wildlife</div>
+    </div>
+  </div>
+
+  <div class="comp-score" id="mmScore"></div>
+  <div class="btn-row">
+    <button class="btn btn-green" onclick="mmCheck()">✓ Check Mind Map</button>
+    <button class="btn btn-ghost" onclick="mmReset()">↺ Reset</button>
+    <button class="btn btn-gold" onclick="nextStage()" id="mmNextBtn" style="display:none">Next: Vocabulary →</button>
+  </div>
+</div>
+
+<!-- ══ STAGE 5: VOCABULARY ══ -->
+<div class="stage" id="stage4">
+  <div class="stage-header">
+    <div class="stage-badge">Step 5 of 5 · Vocabulary</div>
+    <h2>Key Words</h2>
+    <p>Click a card to reveal the definition and an example sentence.</p>
+  </div>
+
+  <div class="vocab-grid">
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🌿</div>
+        <div class="vc-word">ranger</div>
+        <div class="vc-pos">noun</div>
+        <div class="vc-hint">Tony's job title</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">ranger</div>
+        <div class="vc-def">A person who looks after a national park, forest or nature reserve and the wildlife in it.</div>
+        <div class="vc-example">"Tony is a ranger at Kruger National Park."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🐘</div>
+        <div class="vc-word">wildlife</div>
+        <div class="vc-pos">noun (uncountable)</div>
+        <div class="vc-hint">Animals &amp; plants in nature</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">wildlife</div>
+        <div class="vc-def">Wild animals and plants living in their natural environment, not in zoos or gardens.</div>
+        <div class="vc-example">"Rangers protect the wildlife in the park."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🌾</div>
+        <div class="vc-word">plains</div>
+        <div class="vc-pos">noun (plural)</div>
+        <div class="vc-hint">The landscape of Kruger NP</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">plains</div>
+        <div class="vc-def">Large, flat areas of land with very few trees. Common in Africa and South America.</div>
+        <div class="vc-example">"The land is quite flat with wide plains and only a few hills."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🗑️</div>
+        <div class="vc-word">rubbish</div>
+        <div class="vc-pos">noun (British English)</div>
+        <div class="vc-hint">A problem in the park</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">rubbish</div>
+        <div class="vc-def">Waste material or things that are thrown away. Also called "trash" (AmE) or "garbage".</div>
+        <div class="vc-example">"We are trying to reduce how much rubbish is in the park."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🛡️</div>
+        <div class="vc-word">protect</div>
+        <div class="vc-pos">verb</div>
+        <div class="vc-hint">The park's main goal</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">protect</div>
+        <div class="vc-def">To keep someone or something safe from harm, danger or damage.</div>
+        <div class="vc-example">"The goal of the park is to protect the wildlife in South Africa."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🎯</div>
+        <div class="vc-word">symbol</div>
+        <div class="vc-pos">noun</div>
+        <div class="vc-hint">What "Big Five" became</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">symbol</div>
+        <div class="vc-def">Something that represents or stands for something else, like an idea or a value.</div>
+        <div class="vc-example">"Today we use 'Big Five' as a symbol for these amazing animals."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">✈️</div>
+        <div class="vc-word">tourism</div>
+        <div class="vc-pos">noun (uncountable)</div>
+        <div class="vc-hint">Started in 1927</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">tourism</div>
+        <div class="vc-def">The business of providing services for people travelling for pleasure, including hotels, tours and guides.</div>
+        <div class="vc-example">"The park was opened to tourism in 1927."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🏛️</div>
+        <div class="vc-word">to found</div>
+        <div class="vc-pos">verb (past: founded)</div>
+        <div class="vc-hint">Happened in 1926</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">to found</div>
+        <div class="vc-def">To officially start or establish something new, such as an organisation, school or park.</div>
+        <div class="vc-example">"The park was founded and named after Paul Kruger in 1926."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🧭</div>
+        <div class="vc-word">guide</div>
+        <div class="vc-pos">noun</div>
+        <div class="vc-hint">Were trained in 1927</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">guide</div>
+        <div class="vc-def">A person who leads tourists around a place and gives them information about what they see.</div>
+        <div class="vc-example">"Roads, visitor centres and fences were built and guides were trained."</div>
+      </div>
+    </div>
+
+    <div class="vocab-card" onclick="this.classList.toggle('flipped')">
+      <div class="vc-front">
+        <div class="vc-icon">🦏</div>
+        <div class="vc-word">the Big Five</div>
+        <div class="vc-pos">proper noun</div>
+        <div class="vc-hint">Famous African animals</div>
+        <div class="vc-flip-hint">click to see definition ▸</div>
+      </div>
+      <div class="vc-back">
+        <div class="vc-word">the Big Five</div>
+        <div class="vc-def">The five most famous large African animals: elephant 🐘, lion 🦁, leopard 🐆, rhino 🦏 and buffalo 🐃. Originally named by hunters.</div>
+        <div class="vc-example">"Most people come to Kruger NP to see the Big Five."</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="btn-row" style="margin-top:10px">
+    <button class="btn btn-gold" onclick="showCompletion()">🏆 Finish!</button>
+  </div>
+</div>
+
+<!-- ══ COMPLETION ══ -->
+<div class="stage" id="stageComplete">
+  <div class="completion-banner">
+    <div class="trophy">🏆</div>
+    <h2>All done – great work!</h2>
+    <p>You've completed all 5 steps of <em>Exploring the Wild</em>. You can go back to any step using the navigation above.</p>
+    <div class="btn-row">
+      <button class="btn btn-blue"  onclick="goTo(1)">Re-read Interview</button>
+      <button class="btn btn-ghost" onclick="goTo(0)">↺ Start Over</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── STAGE NAVIGATION ── */
+let currentStage = 0;
+const TOTAL = 5;
+
+function goTo(n) {
+  document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+  document.getElementById(n < TOTAL ? 'stage'+n : 'stageComplete').classList.add('active');
+  currentStage = n;
+  updateNav();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function nextStage() { goTo(currentStage + 1); }
+
+function updateNav() {
+  const pips = document.querySelectorAll('.step-pip');
+  pips.forEach((p, i) => {
+    p.classList.remove('active','done');
+    if (i < currentStage) p.classList.add('done');
+    if (i === currentStage) p.classList.add('active');
+  });
+  document.getElementById('progressBar').style.width = (currentStage / TOTAL * 100) + '%';
+}
+
+function showCompletion() { goTo(TOTAL); }
+
+/* ── STEP 1: PRE-READING ── */
+const preCorrect = [1, 1, 2, 0]; // correct option index for each question
+const preMsg = [
+  ['Kenya is in East Africa – Kruger is in South Africa!', 'Correct! Kruger National Park is in South Africa.', 'Tanzania is in East Africa – try again.', 'Zimbabwe borders South Africa, but that\'s not it.'],
+  ['Rangers don\'t fly planes.', 'Correct! Rangers protect wildlife and the natural environment.', 'That\'s not what rangers do.', 'That\'s a construction worker.'],
+  ['The Big Five has more than 3 animals!', 'There are 5, but you need one more!', 'Correct! The Big Five has exactly 5 animals.', 'There are fewer than 6.'],
+  ['Correct! Wildlife, nature and animals are the main attractions.', 'Shopping is not why people visit national parks.', 'Parks don\'t have shops like that.', 'Football is not a reason to visit a national park.'],
+];
+let preAnswered = [false,false,false,false];
+let preDone = 0;
+
+function preAnswer(btn, qi, chosen) {
+  if (preAnswered[qi]) return;
+  preAnswered[qi] = true;
+  const opts = btn.parentElement.querySelectorAll('.pre-opt');
+  opts.forEach(b => b.disabled = true);
+  const isCorrect = chosen === preCorrect[qi];
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) opts[preCorrect[qi]].classList.add('correct');
+  document.getElementById('pfb'+qi).innerHTML = (isCorrect ? '✅ ' : '❌ ') + preMsg[qi][chosen];
+  preDone++;
+  if (preDone === 1) document.getElementById('pq1').style.display = 'block';
+  if (preDone === 2) document.getElementById('pq2').style.display = 'block';
+  if (preDone === 3) document.getElementById('pq3').style.display = 'block';
+  if (preDone === 4) document.getElementById('preNextBtn').style.display = 'inline-flex';
+}
+
+/* ── STEP 2: READER ── */
+let readerIdx = 0;
+const bubbles = document.querySelectorAll('.bubble-wrap');
+// Hide all except first on init
+bubbles.forEach((b,i) => { if(i>0) b.classList.remove('visible'); });
+updateReaderProgress();
+
+function readerNext() {
+  if (readerIdx < bubbles.length - 1) {
+    readerIdx++;
+    bubbles[readerIdx].classList.add('visible');
+    updateReaderProgress();
+    const cw = document.getElementById('chatWindow');
+    cw.scrollTop = cw.scrollHeight;
+  }
+}
+function readerPrev() {
+  if (readerIdx > 0) {
+    bubbles[readerIdx].classList.remove('visible');
+    readerIdx--;
+    updateReaderProgress();
+  }
+}
+function readerAll() {
+  bubbles.forEach(b => b.classList.add('visible'));
+  readerIdx = bubbles.length - 1;
+  updateReaderProgress();
+  const cw = document.getElementById('chatWindow');
+  cw.scrollTop = cw.scrollHeight;
+}
+function updateReaderProgress() {
+  document.getElementById('readerProgress').textContent = `${readerIdx+1} / ${bubbles.length}`;
+}
+
+/* ── STEP 3: COMPREHENSION ── */
+let tfAnswered = {};
+let mcAnswered = {};
+let compScore  = 0;
+let compTotal  = 8; // 5 TF + 3 MC
+
+function tfAnswer(btn, id, isCorrect, msg) {
+  if (tfAnswered[id]) return;
+  tfAnswered[id] = true;
+  btn.parentElement.querySelectorAll('.tf-btn').forEach(b => b.disabled = true);
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById('fb-'+id);
+  fb.innerHTML = (isCorrect ? '✅ ' : '❌ ') + msg;
+  fb.className = 'comp-fb ' + (isCorrect ? 'ok' : 'err');
+  if (isCorrect) { compScore++; updateCompScore(); }
+}
+
+function mcAnswer(btn, id, isCorrect, msg) {
+  if (mcAnswered[id]) return;
+  mcAnswered[id] = true;
+  btn.parentElement.querySelectorAll('.mc-opt').forEach(b => b.disabled = true);
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  const fb = document.getElementById('fb-'+id);
+  fb.innerHTML = (isCorrect ? '✅ ' : '❌ ') + msg;
+  fb.className = 'comp-fb ' + (isCorrect ? 'ok' : 'err');
+  if (isCorrect) { compScore++; updateCompScore(); }
+}
+
+function updateCompScore() {
+  const answered = Object.keys(tfAnswered).length + Object.keys(mcAnswered).length;
+  if (answered === compTotal) {
+    document.getElementById('compScore').textContent =
+      `Result: ${compScore} / ${compTotal} correct` + (compScore === compTotal ? ' 🏆' : ' – keep going!');
+  }
+}
+
+/* ── STEP 4: MIND MAP ── */
+let draggedChip = null;
+
+function mmDragStart(e) {
+  draggedChip = e.target;
+  e.target.classList.add('dragging');
+  e.dataTransfer.setData('text/plain', e.target.dataset.word);
+}
+function mmDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function mmDragLeave(el) { el.classList.remove('drag-over'); }
+
+function mmDrop(e, branch) {
+  e.preventDefault();
+  branch.classList.remove('drag-over');
+  if (!draggedChip) return;
+  const word   = draggedChip.dataset.word;
+  const target = draggedChip.dataset.branch;
+  const zone   = branch.dataset.branch;
+
+  // Place chip in zone
+  const dz = branch.querySelector('.mm-drop-zone');
+  const placed = document.createElement('div');
+  placed.className = 'mm-placed-chip';
+  placed.dataset.word = word;
+  placed.dataset.branch = target;
+  placed.innerHTML = word + ' <span class="remove-chip" onclick="mmRemove(this)">✕</span>';
+  dz.appendChild(placed);
+
+  draggedChip.classList.add('placed');
+  draggedChip.classList.remove('dragging');
+  draggedChip = null;
+}
+
+function mmRemove(span) {
+  const chip = span.parentElement;
+  const word = chip.dataset.word;
+  chip.remove();
+  // Re-enable source chip
+  document.querySelectorAll('.chip').forEach(c => {
+    if (c.dataset.word === word) c.classList.remove('placed');
+  });
+}
+
+function mmCheck() {
+  let correct = 0, total = 0;
+  document.querySelectorAll('.mm-placed-chip').forEach(chip => {
+    total++;
+    const placed = chip.closest('.mm-branch').dataset.branch;
+    if (chip.dataset.branch === placed) {
+      correct++;
+      chip.style.outline = '2px solid var(--green)';
+    } else {
+      chip.style.outline = '2px solid var(--red)';
+    }
+  });
+  const remaining = document.querySelectorAll('.chip:not(.placed)').length;
+  document.getElementById('mmScore').textContent =
+    `${correct} / ${total} placed correctly` +
+    (remaining > 0 ? ` · ${remaining} chips not placed yet` : '') +
+    (correct === 14 && total === 14 ? ' 🏆 Perfect!' : '');
+  if (correct === total && total === 14) {
+    document.getElementById('mmNextBtn').style.display = 'inline-flex';
+  }
+}
+
+function mmReset() {
+  document.querySelectorAll('.mm-placed-chip').forEach(c => c.remove());
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('placed','dragging');
+    c.style.opacity = '';
+  });
+  document.getElementById('mmScore').textContent = '';
+  document.getElementById('mmNextBtn').style.display = 'none';
+}
+</script>
+</body>
+</html>
